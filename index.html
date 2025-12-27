@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情经期记录</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>心情经期记录</h1>
+                <p>记录每日心情，关爱自己</p>
+            </div>
+            
+            <div class="login-tabs">
+                <button class="login-tab active" data-tab="email">邮箱登录</button>
+            </div>
+            
+            <!-- 邮箱登录 -->
+            <div class="login-form active" id="emailLogin">
+                <div class="form-group">
+                    <label for="email">邮箱地址</label>
+                    <input type="email" id="email" placeholder="请输入邮箱地址">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" placeholder="请输入密码">
+                </div>
+                <button class="login-btn" id="emailLoginBtn">登录</button>
+                <button class="signup-btn" id="signupBtn">注册新账号</button>
+                <div class="forgot-password">
+                    <button class="forgot-btn" id="forgotBtn">忘记密码？</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用界面 -->
+    <div class="app-container" id="appContainer" style="display: none;">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="header-left">
+                <h1>心情经期记录</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info" id="userInfo">
+                    <img class="user-avatar" id="userAvatar" src="" alt="头像">
+                    <span class="user-name" id="userName">用户</span>
+                    <button class="logout-btn" id="logoutBtn">退出</button>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="record">记录</button>
+                <button class="nav-tab" data-tab="trends">趋势</button>
+                <button class="nav-tab" data-tab="analysis">关联分析</button>
+            </nav>
+        </header>
+
+        <!-- 记录页面 -->
+        <div class="tab-content active" id="record">
+            <div class="record-container">
+                <div class="date-selector">
+                    <label for="recordDate">选择日期：</label>
+                    <input type="date" id="recordDate">
+                </div>
+
+                <!-- 心情记录 -->
+                <div class="mood-section">
+                    <h3>今日心情</h3>
+                    <div class="mood-selector">
+                        <div class="mood-option" data-mood="1">
+                            <div class="mood-emoji">😢</div>
+                            <span>很糟糕</span>
+                        </div>
+                        <div class="mood-option" data-mood="2">
+                            <div class="mood-emoji">😕</div>
+                            <span>不太好</span>
+                        </div>
+                        <div class="mood-option" data-mood="3">
+                            <div class="mood-emoji">😐</div>
+                            <span>一般</span>
+                        </div>
+                        <div class="mood-option" data-mood="4">
+                            <div class="mood-emoji">😊</div>
+                            <span>不错</span>
+                        </div>
+                        <div class="mood-option" data-mood="5">
+                            <div class="mood-emoji">😄</div>
+                            <span>很棒</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 经期记录 -->
+                <div class="period-section">
+                    <h3>经期记录</h3>
+                    <div class="period-options">
+                        <label class="period-option">
+                            <input type="radio" name="period" value="none" checked>
+                            <span>无</span>
+                        </label>
+                        <label class="period-option">
+                            <input type="radio" name="period" value="light">
+                            <span>轻微</span>
+                        </label>
+                        <label class="period-option">
+                            <input type="radio" name="period" value="normal">
+                            <span>正常</span>
+                        </label>
+                        <label class="period-option">
+                            <input type="radio" name="period" value="heavy">
+                            <span>较重</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 备注 -->
+                <div class="notes-section">
+                    <h3>备注</h3>
+                    <textarea id="notes" placeholder="记录今天的感受或其他信息..."></textarea>
+                </div>
+
+                <button class="save-record-btn" id="saveRecord">保存记录</button>
+            </div>
+        </div>
+
+        <!-- 趋势页面 -->
+        <div class="tab-content" id="trends">
+            <div class="trends-container">
+                <div class="chart-controls">
+                    <select id="timeRange">
+                        <option value="7">最近7天</option>
+                        <option value="30">最近30天</option>
+                        <option value="90">最近90天</option>
+                    </select>
+                </div>
+                <div class="charts">
+                    <div class="chart-section">
+                        <h3>心情趋势</h3>
+                        <div class="chart-container" id="moodChart"></div>
+                    </div>
+                    <div class="chart-section">
+                        <h3>经期记录</h3>
+                        <div class="chart-container" id="periodChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关联分析页面 -->
+        <div class="tab-content" id="analysis">
+            <div class="analysis-container">
+                <div class="analysis-summary">
+                    <h3>心情与经期关联分析</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="avgMoodPeriod">-</div>
+                            <div class="stat-label">经期平均心情</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="avgMoodNormal">-</div>
+                            <div class="stat-label">非经期平均心情</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="correlationScore">-</div>
+                            <div class="stat-label">关联度</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="analysis-chart">
+                    <div class="chart-container" id="correlationChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
