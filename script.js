@@ -5,7 +5,8 @@ class MoodPeriodTracker {
         this.supabase = null;
         this.currentUser = null;
         this.currentMood = null;
-        this.currentPeriod = 'none';
+        this.currentPeriod = false;
+        this.currentFitness = false;
         
         this.initSupabase();
         this.initElements();
@@ -43,6 +44,7 @@ class MoodPeriodTracker {
         this.recordDate = document.getElementById('recordDate');
         this.moodOptions = document.querySelectorAll('.mood-option');
         this.periodOptions = document.querySelectorAll('input[name="period"]');
+        this.fitnessOptions = document.querySelectorAll('input[name="fitness"]');
         this.notesInput = document.getElementById('notes');
         this.saveRecordBtn = document.getElementById('saveRecord');
         
@@ -50,11 +52,13 @@ class MoodPeriodTracker {
         this.timeRange = document.getElementById('timeRange');
         this.moodChart = document.getElementById('moodChart');
         this.periodChart = document.getElementById('periodChart');
+        this.fitnessChart = document.getElementById('fitnessChart');
         
         // 分析页面元素
         this.avgMoodPeriod = document.getElementById('avgMoodPeriod');
         this.avgMoodNormal = document.getElementById('avgMoodNormal');
-        this.correlationScore = document.getElementById('correlationScore');
+        this.avgMoodFitness = document.getElementById('avgMoodFitness');
+        this.avgMoodNoFitness = document.getElementById('avgMoodNoFitness');
         this.correlationChart = document.getElementById('correlationChart');
     }
 
@@ -87,7 +91,12 @@ class MoodPeriodTracker {
 
         // 经期选择
         this.periodOptions.forEach(option => {
-            option.addEventListener('change', () => this.selectPeriod(option.value));
+            option.addEventListener('change', () => this.selectPeriod(option.value === 'true'));
+        });
+
+        // 健身选择
+        this.fitnessOptions.forEach(option => {
+            option.addEventListener('change', () => this.selectFitness(option.value === 'true'));
         });
 
         // 保存记录
@@ -354,6 +363,10 @@ class MoodPeriodTracker {
         this.currentPeriod = period;
     }
 
+    selectFitness(fitness) {
+        this.currentFitness = fitness;
+    }
+
     async saveRecord() {
         if (!this.currentUser) {
             alert('请先登录');
@@ -379,6 +392,7 @@ class MoodPeriodTracker {
                 record_date: date,
                 mood_level: this.currentMood,
                 period_status: this.currentPeriod,
+                fitness_status: this.currentFitness,
                 notes: notes,
                 updated_at: new Date().toISOString()
             };
@@ -425,6 +439,13 @@ class MoodPeriodTracker {
                     periodRadio.checked = true;
                 }
                 
+                // 加载健身状态
+                this.currentFitness = data.fitness_status;
+                const fitnessRadio = document.querySelector(`input[name="fitness"][value="${data.fitness_status}"]`);
+                if (fitnessRadio) {
+                    fitnessRadio.checked = true;
+                }
+                
                 // 加载备注
                 this.notesInput.value = data.notes || '';
             } else {
@@ -443,9 +464,11 @@ class MoodPeriodTracker {
 
     clearForm() {
         this.currentMood = null;
-        this.currentPeriod = 'none';
+        this.currentPeriod = false;
+        this.currentFitness = false;
         this.moodOptions.forEach(option => option.classList.remove('selected'));
-        document.querySelector('input[name="period"][value="none"]').checked = true;
+        document.querySelector('input[name="period"][value="false"]').checked = true;
+        document.querySelector('input[name="fitness"][value="false"]').checked = true;
         this.notesInput.value = '';
     }
 
@@ -482,6 +505,7 @@ class MoodPeriodTracker {
         // 清空现有图表
         this.moodChart.innerHTML = '<canvas id="moodChartCanvas"></canvas>';
         this.periodChart.innerHTML = '<canvas id="periodChartCanvas"></canvas>';
+        this.fitnessChart.innerHTML = '<canvas id="fitnessChartCanvas"></canvas>';
 
         // 准备心情数据
         const moodData = this.prepareMoodChartData(data);
@@ -490,6 +514,10 @@ class MoodPeriodTracker {
         // 准备经期数据
         const periodData = this.preparePeriodChartData(data);
         this.createPeriodChart(periodData);
+
+        // 准备健身数据
+        const fitnessData = this.prepareFitnessChartData(data);
+        this.createFitnessChart(fitnessData);
     }
 
     prepareMoodChartData(data) {
@@ -536,26 +564,43 @@ class MoodPeriodTracker {
     }
 
     preparePeriodChartData(data) {
-        const periodCounts = { none: 0, light: 0, normal: 0, heavy: 0 };
+        const periodCounts = { false: 0, true: 0 };
         
         data.forEach(record => {
             periodCounts[record.period_status]++;
         });
 
         return {
-            labels: ['无', '轻微', '正常', '较重'],
-            values: [periodCounts.none, periodCounts.light, periodCounts.normal, periodCounts.heavy],
+            labels: ['无', '有'],
+            values: [periodCounts[false], periodCounts[true]],
             colors: [
                 'rgba(232, 232, 232, 0.4)', // 无 - 半透明灰色
-                'rgba(255, 179, 186, 0.4)', // 轻微 - 半透明浅粉色
-                'rgba(255, 123, 123, 0.4)', // 正常 - 半透明粉色
-                'rgba(255, 71, 87, 0.4)'    // 较重 - 半透明深粉色
+                'rgba(255, 123, 123, 0.4)'  // 有 - 半透明粉色
             ],
             borderColors: [
                 'rgba(232, 232, 232, 0.8)',
-                'rgba(255, 179, 186, 0.8)',
-                'rgba(255, 123, 123, 0.8)',
-                'rgba(255, 71, 87, 0.8)'
+                'rgba(255, 123, 123, 0.8)'
+            ]
+        };
+    }
+
+    prepareFitnessChartData(data) {
+        const fitnessCounts = { false: 0, true: 0 };
+        
+        data.forEach(record => {
+            fitnessCounts[record.fitness_status]++;
+        });
+
+        return {
+            labels: ['无', '有'],
+            values: [fitnessCounts[false], fitnessCounts[true]],
+            colors: [
+                'rgba(232, 232, 232, 0.4)', // 无 - 半透明灰色
+                'rgba(102, 187, 106, 0.4)'  // 有 - 半透明绿色
+            ],
+            borderColors: [
+                'rgba(232, 232, 232, 0.8)',
+                'rgba(102, 187, 106, 0.8)'
             ]
         };
     }
@@ -765,6 +810,95 @@ class MoodPeriodTracker {
         });
     }
 
+    createFitnessChart(data) {
+        const ctx = document.getElementById('fitnessChartCanvas').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    backgroundColor: data.colors,
+                    borderColor: data.borderColors,
+                    borderWidth: 2,
+                    hoverOffset: 15,
+                    hoverBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 25,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 14,
+                                weight: '500'
+                            },
+                            color: '#666',
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        return {
+                                            text: `${label} (${value})`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            strokeStyle: data.datasets[0].borderColor[i],
+                                            lineWidth: 2,
+                                            pointStyle: 'circle',
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((context.parsed * 100) / total).toFixed(1) : '0.0';
+                                return `${context.label}: ${context.parsed} 天 (${percentage}%)`;
+                            }
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#333',
+                        bodyColor: '#666',
+                        borderColor: 'rgba(102, 187, 106, 0.3)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        displayColors: true,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                },
+                interaction: {
+                    intersect: false
+                }
+            }
+        });
+    }
+
     async updateAnalysis() {
         if (!this.currentUser) return;
 
@@ -787,36 +921,39 @@ class MoodPeriodTracker {
     }
 
     calculateCorrelation(data) {
-        const periodRecords = data.filter(record => record.period_status !== 'none');
-        const normalRecords = data.filter(record => record.period_status === 'none');
+        const periodRecords = data.filter(record => record.period_status === true);
+        const normalRecords = data.filter(record => record.period_status === false);
+        const fitnessRecords = data.filter(record => record.fitness_status === true);
+        const noFitnessRecords = data.filter(record => record.fitness_status === false);
 
-        if (periodRecords.length === 0) {
-            this.avgMoodPeriod.textContent = '-';
-            this.avgMoodNormal.textContent = normalRecords.length > 0 ? 
-                (normalRecords.reduce((sum, r) => sum + r.mood_level, 0) / normalRecords.length).toFixed(1) : '-';
-            this.correlationScore.textContent = '-';
-            this.correlationChart.innerHTML = '<p style="color: #999; text-align: center;">暂无足够数据进行关联分析</p>';
-            return;
-        }
-
-        const avgMoodPeriod = periodRecords.reduce((sum, r) => sum + r.mood_level, 0) / periodRecords.length;
+        // 计算经期相关数据
+        const avgMoodPeriod = periodRecords.length > 0 ? 
+            periodRecords.reduce((sum, r) => sum + r.mood_level, 0) / periodRecords.length : 0;
         const avgMoodNormal = normalRecords.length > 0 ? 
             normalRecords.reduce((sum, r) => sum + r.mood_level, 0) / normalRecords.length : 0;
 
-        this.avgMoodPeriod.textContent = avgMoodPeriod.toFixed(1);
-        this.avgMoodNormal.textContent = avgMoodNormal.toFixed(1);
+        // 计算健身相关数据
+        const avgMoodFitness = fitnessRecords.length > 0 ? 
+            fitnessRecords.reduce((sum, r) => sum + r.mood_level, 0) / fitnessRecords.length : 0;
+        const avgMoodNoFitness = noFitnessRecords.length > 0 ? 
+            noFitnessRecords.reduce((sum, r) => sum + r.mood_level, 0) / noFitnessRecords.length : 0;
 
-        // 简单的关联度计算
-        const difference = Math.abs(avgMoodPeriod - avgMoodNormal);
-        const correlationScore = Math.min(difference * 20, 100); // 转换为百分比
-
-        this.correlationScore.textContent = correlationScore.toFixed(0) + '%';
+        // 更新显示
+        this.avgMoodPeriod.textContent = periodRecords.length > 0 ? avgMoodPeriod.toFixed(1) : '-';
+        this.avgMoodNormal.textContent = normalRecords.length > 0 ? avgMoodNormal.toFixed(1) : '-';
+        this.avgMoodFitness.textContent = fitnessRecords.length > 0 ? avgMoodFitness.toFixed(1) : '-';
+        this.avgMoodNoFitness.textContent = noFitnessRecords.length > 0 ? avgMoodNoFitness.toFixed(1) : '-';
 
         // 创建对比图表
-        this.createCorrelationChart(avgMoodPeriod, avgMoodNormal, periodRecords.length, normalRecords.length);
+        this.createCorrelationChart({
+            periodData: { avg: avgMoodPeriod, count: periodRecords.length },
+            normalData: { avg: avgMoodNormal, count: normalRecords.length },
+            fitnessData: { avg: avgMoodFitness, count: fitnessRecords.length },
+            noFitnessData: { avg: avgMoodNoFitness, count: noFitnessRecords.length }
+        });
     }
 
-    createCorrelationChart(avgMoodPeriod, avgMoodNormal, periodDays, normalDays) {
+    createCorrelationChart(data) {
         this.correlationChart.innerHTML = '<canvas id="correlationChartCanvas"></canvas>';
         
         const ctx = document.getElementById('correlationChartCanvas').getContext('2d');
@@ -824,17 +961,21 @@ class MoodPeriodTracker {
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['经期期间', '非经期期间'],
+                labels: ['经期期间', '非经期期间', '健身日', '非健身日'],
                 datasets: [{
                     label: '平均心情',
-                    data: [avgMoodPeriod, avgMoodNormal],
+                    data: [data.periodData.avg, data.normalData.avg, data.fitnessData.avg, data.noFitnessData.avg],
                     backgroundColor: [
                         'rgba(255, 154, 158, 0.4)',
-                        'rgba(102, 187, 106, 0.4)'
+                        'rgba(232, 232, 232, 0.4)',
+                        'rgba(102, 187, 106, 0.4)',
+                        'rgba(189, 189, 189, 0.4)'
                     ],
                     borderColor: [
                         'rgba(255, 154, 158, 0.8)',
-                        'rgba(102, 187, 106, 0.8)'
+                        'rgba(232, 232, 232, 0.8)',
+                        'rgba(102, 187, 106, 0.8)',
+                        'rgba(189, 189, 189, 0.8)'
                     ],
                     borderWidth: 2,
                     borderRadius: 12,
@@ -851,8 +992,10 @@ class MoodPeriodTracker {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const days = context.dataIndex === 0 ? periodDays : normalDays;
-                                return `平均心情: ${context.parsed.y.toFixed(1)}/5 (${days} 天数据)`;
+                                const labels = ['periodData', 'normalData', 'fitnessData', 'noFitnessData'];
+                                const dataKey = labels[context.dataIndex];
+                                const count = data[dataKey].count;
+                                return `平均心情: ${context.parsed.y.toFixed(1)}/5 (${count} 天数据)`;
                             }
                         },
                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -899,7 +1042,7 @@ class MoodPeriodTracker {
                         ticks: {
                             color: '#666',
                             font: {
-                                size: 13,
+                                size: 11,
                                 weight: '500'
                             }
                         },

@@ -99,20 +99,27 @@
                     <h3>经期记录</h3>
                     <div class="period-options">
                         <label class="period-option">
-                            <input type="radio" name="period" value="none" checked>
+                            <input type="radio" name="period" value="false" checked>
                             <span>无</span>
                         </label>
                         <label class="period-option">
-                            <input type="radio" name="period" value="light">
-                            <span>轻微</span>
+                            <input type="radio" name="period" value="true">
+                            <span>有</span>
                         </label>
-                        <label class="period-option">
-                            <input type="radio" name="period" value="normal">
-                            <span>正常</span>
+                    </div>
+                </div>
+
+                <!-- 健身记录 -->
+                <div class="fitness-section">
+                    <h3>健身记录</h3>
+                    <div class="fitness-options">
+                        <label class="fitness-option">
+                            <input type="radio" name="fitness" value="false" checked>
+                            <span>无</span>
                         </label>
-                        <label class="period-option">
-                            <input type="radio" name="period" value="heavy">
-                            <span>较重</span>
+                        <label class="fitness-option">
+                            <input type="radio" name="fitness" value="true">
+                            <span>有</span>
                         </label>
                     </div>
                 </div>
@@ -146,6 +153,10 @@
                         <h3>经期记录</h3>
                         <div class="chart-container" id="periodChart"></div>
                     </div>
+                    <div class="chart-section">
+                        <h3>健身记录</h3>
+                        <div class="chart-container" id="fitnessChart"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,8 +176,12 @@
                             <div class="stat-label">非经期平均心情</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number" id="correlationScore">-</div>
-                            <div class="stat-label">关联度</div>
+                            <div class="stat-number" id="avgMoodFitness">-</div>
+                            <div class="stat-label">健身日平均心情</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="avgMoodNoFitness">-</div>
+                            <div class="stat-label">非健身日平均心情</div>
                         </div>
                     </div>
                 </div>

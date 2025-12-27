@@ -109,7 +109,7 @@ body {
     font-size: 1rem;
 }
 
-.mood-section, .period-section, .notes-section {
+.mood-section, .period-section, .fitness-section, .notes-section {
     background: white;
     padding: 2rem;
     border-radius: 15px;
@@ -117,7 +117,7 @@ body {
     margin-bottom: 2rem;
 }
 
-.mood-section h3, .period-section h3, .notes-section h3 {
+.mood-section h3, .period-section h3, .fitness-section h3, .notes-section h3 {
     color: #d63384;
     margin-bottom: 1.5rem;
     text-align: center;
@@ -165,15 +165,15 @@ body {
     font-weight: 500;
 }
 
-/* 经期选择器 */
-.period-options {
+/* 经期和健身选择器 */
+.period-options, .fitness-options {
     display: flex;
     justify-content: center;
     gap: 2rem;
     flex-wrap: wrap;
 }
 
-.period-option {
+.period-option, .fitness-option {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -183,16 +183,17 @@ body {
     border: 2px solid #fecfef;
 }
 
-.period-option:hover {
+.period-option:hover, .fitness-option:hover {
     background: rgba(255, 154, 158, 0.1);
 }
 
-.period-option input[type="radio"] {
+.period-option input[type="radio"], .fitness-option input[type="radio"] {
     margin-right: 0.5rem;
     accent-color: #d63384;
 }
 
-.period-option input[type="radio"]:checked + span {
+.period-option input[type="radio"]:checked + span, 
+.fitness-option input[type="radio"]:checked + span {
     color: #d63384;
     font-weight: 600;
 }
@@ -340,7 +341,7 @@ body {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1.5rem;
 }
 
@@ -433,7 +434,7 @@ body {
         font-size: 2rem;
     }
     
-    .period-options {
+    .period-options, .fitness-options {
         gap: 1rem;
         justify-content: space-around;
     }
